@@ -1,0 +1,55 @@
+<% layout('layout') -%>
+<script>
+   $('document').ready(function(){
+
+      $('.comment-text').each(function(index, $ele){
+         var times = $( $ele ).text().split("-");
+         var start = moment.utc( times[0] );
+         var end = moment.utc( times[1] );
+         var text = start.format("h:mm a") + " to " + end.format("h:mm a");
+         $( $ele).html( text );
+      });
+   });
+</script>
+<div class="row">
+   <div class="panel panel-default widget">
+      <div class="panel-heading">
+         <h2 class="panel-title">Specials</h2>
+         <span><%= specials.length %></span>
+         <a class="label label-success pull-right" href="/specials/create">Add Site
+            <span class="glyphicon glyphicon-plus"></span>
+         </a>
+      </div>
+      <div class="panel-body">
+         <ul class="list-group">
+            <% for(var i=0; i < specials.length;i++) { %>
+            <li class="list-group-item">
+               <div class="row">
+                  <div class="col-xs-10 col-md-11">
+                     <div>
+                        <a href="/specials/details/<%= specials[i].id %>">
+                           <%= specials[i].title %> at <%= specials[i]._site.name %></a>
+                        <div class="mic-info">
+                           <%= specials[i].description %>
+                        </div>
+                     </div>
+                     <div class="comment-text"> <%= specials[i].start %>-<%= specials[i].end %> </div>
+                     <div class="action">
+                        <a class="btn btn-primary btn-xs" href="/site/edit/<%= specials[i].id %>">
+                           <span class="glyphicon glyphicon-pencil"></span>
+                        </a>
+                        <button id="<%= specials[i]._id %>"
+                                type="button" class="btn btn-danger btn-xs" title="Delete">
+                           <span class="glyphicon glyphicon-trash"></span>
+                        </button>
+                     </div>
+                  </div>
+               </div>
+            </li>
+            <% } %>
+         </ul>
+         <a href="#" class="btn btn-primary btn-sm btn-block" role="button">
+            <span class="glyphicon glyphicon-refresh"></span> More</a>
+      </div>
+   </div>
+</div>

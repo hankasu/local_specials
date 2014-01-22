@@ -1,0 +1,68 @@
+<% layout('layout') -%>
+<script type="text/javascript">
+  $('document').ready(function() {
+    $('button[title="Delete"]').click(function(eventObj){
+      if(confirm("Are you sure you want to delete this site?") === false){
+        return false;
+      }
+      var id = eventObj.currentTarget.id;
+      $.ajax({
+        url:"/site/delete/" + id,
+        type: "DELETE",
+        success : function (data, status) {
+          alert("Deleted " + data);
+        }
+      });
+    });
+  });
+</script>
+<div class="row">
+  <div class="panel panel-default widget">
+  <div class="panel-heading">
+    <h2 class="panel-title">Sites</h2>
+    <span><%= sites.length %></span>
+    <a class="label label-success pull-right" href="/site/create">Add Site
+    	<span class="glyphicon glyphicon-plus"></span>
+    </a>
+  </div>
+  <div class="panel-body">
+    <ul class="list-group">
+      <% for(var i=0; i < sites.length;i++) { %>
+        <li class="list-group-item">
+        <div class="row">
+          <div class="col-xs-2 col-md-1">
+          <img src="images/<%= sites[i].img %>"
+          class="img-circle img-responsive" alt=""/>
+          </div>
+          <div class="col-xs-10 col-md-11">
+            <div>
+              <a href="/site/details/<%= sites[i].id %>"><%= sites[i].name %></a>
+              <div class="mic-info">
+              <%= sites[i].description %>
+              </div> 
+            </div>
+            <div class="comment-text">
+              <%= sites[i].phone %>
+            </div>
+              <div class="action">
+                <a class="btn btn-primary btn-xs" href="/site/edit/<%= sites[i].id %>">
+                 <span class="glyphicon glyphicon-pencil"></span>
+                </a>
+                <button id="<%= sites[i]._id %>"
+                        type="button" class="btn btn-danger btn-xs" title="Delete">
+                  <span class="glyphicon glyphicon-trash"></span>
+                </button>
+                 <a class="btn btn-success btn-xs" href="/special/create/<%= sites[i].id %>">
+                    <span class="glyphicon glyphicon-plus-sign">Add Special</span>
+                 </a>
+            </div>
+          </div>
+        </div>
+        </li>
+      <% } %>
+    </ul>
+    <a href="#" class="btn btn-primary btn-sm btn-block" role="button">
+    <span class="glyphicon glyphicon-refresh"></span> More</a>
+  </div>
+  </div>
+</div>

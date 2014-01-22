@@ -1,0 +1,32 @@
+<% layout('layout') -%>
+<!--TODO add current user location http://leafletjs.com/examples/mobile.html-->
+<script type="text/javascript">
+   $( 'document').ready( function (){
+      var api = 'e64f3e9ceac545da9879a009cfa18d91',
+          lat = parseFloat($('#lat').html()),
+          lon = parseFloat($('#lon').html()),
+          siteName = $('#siteName').html(),
+          map = L.map('map').setView([lat, lon], 15);
+      L.tileLayer('http://{s}.tile.cloudmade.com/'
+                     + api + '/997/256/{z}/{x}/{y}.png').addTo(map);
+      L.marker([lat,lon]).addTo(map)
+              .bindPopup('<strong>' + siteName + '</strong>')
+              .openPopup();
+
+   });
+</script>
+<div id="lat" hidden="true"><%= site.loc[1] %></div>
+<div id="lon" hidden="true"><%= site.loc[0] %></div>
+<div class="container">
+   <div class="row">
+      <h4 id="siteName"><%= site.name %></h4>
+      <h5><%= site.description %></h5>
+      <a href="<%= site.website %>">Website</a></br>
+      <abbr title="Phone">P:</abbr><%= site.phone %></br>
+   </div>
+   <hr>
+   <div class="panel panel-success">
+      <div class="panel-heading">Location for <%= site.name %></div>
+      <div id="map" class="panel-body"></div>
+   </div>
+</div>
