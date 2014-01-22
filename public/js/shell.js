@@ -67,4 +67,5 @@ shell = (function () {
     initModule   : initModule
   };
   //------------------- END PUBLIC METHODS ---------------------
+  //--commit testing
 }());
