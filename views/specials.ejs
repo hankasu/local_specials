@@ -3,12 +3,36 @@
    $('document').ready(function(){
 
       $('.comment-text').each(function(index, $ele){
-         var times = $( $ele ).text().split("-");
-         var start = moment.utc( times[0] );
-         var end = moment.utc( times[1] );
-         var text = start.format("h:mm a") + " to " + end.format("h:mm a");
-         $( $ele).html( text );
+         var times = $( $ele ).text().split("_"),
+             start = moment( times[0]).format("h:mm a"),
+             end = moment( times[1]).format("h:mm a"),
+             text = start + " to " + end;
+
+         if(start === "12:00 am" && end === "12:00 am"){
+            text = 'All day'
+         }
+         else if( end === "12:00 am"){
+            text = start + " to Close";
+         }
+
+         $( $ele ).html( text );
+
       });
+
+      $('button[title="Delete"]').click(function(eventObj){
+         if(confirm("Are you sure you want to delete this special?") === false){
+            return false;
+         }
+         var id = eventObj.currentTarget.id;
+         $.ajax({
+            url:"/special/delete/" + id,
+            type: "DELETE",
+            success : function (data, status) {
+               alert(data);
+            }
+         });
+      });
+
    });
 </script>
 <div class="row">
@@ -28,14 +52,16 @@
                   <div class="col-xs-10 col-md-11">
                      <div>
                         <a href="/specials/details/<%= specials[i].id %>">
-                           <%= specials[i].title %> at <%= specials[i]._site.name %></a>
+                           <%= specials[i].title %> at <%= specials[i]._site.name %>
+                        </a>
+                        <span id="timeLeft" class="pull-right">Time</span>
                         <div class="mic-info">
                            <%= specials[i].description %>
                         </div>
                      </div>
-                     <div class="comment-text"> <%= specials[i].start %>-<%= specials[i].end %> </div>
+                     <div class="comment-text"> <%= specials[i].start %>_<%= specials[i].end %> </div>
                      <div class="action">
-                        <a class="btn btn-primary btn-xs" href="/site/edit/<%= specials[i].id %>">
+                        <a class="btn btn-primary btn-xs" href="/special/edit/<%= specials[i].id %>">
                            <span class="glyphicon glyphicon-pencil"></span>
                         </a>
                         <button id="<%= specials[i]._id %>"

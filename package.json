@@ -1,6 +1,6 @@
 {
   "name": "DurangoSpecials",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "scripts": {
     "start": "node app.js"
@@ -9,6 +9,7 @@
     "express": "3.4.0",
     "ejs": "*",
     "ejs-locals":"latest",
-    "mongoose":"latest"
+    "mongoose":"latest",
+    "mocha":"latest"
   }
 }

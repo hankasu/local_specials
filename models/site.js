@@ -22,6 +22,8 @@ specialSchema = new Schema({
    description : { type : String, default : '', trim : true },
    start       : { type : Date },
    end         : { type : Date },
+   startTime   : { type : Number },
+   endTime     : { type : Number },
    days        : [Number], //0 is all days of the week, Sun=1
    months      : [Number] //0 is all year long
 });

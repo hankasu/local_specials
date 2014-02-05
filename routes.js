@@ -48,12 +48,13 @@ function getNumberArray(strValues){
 //need to make this async
 //value will be in hh:mm 24 hour
 function parseTime(timeValue){
-   var dateObj = new Date(2000,0,0),
+   var dateObj = new Date(),
        timeParts = timeValue.split(/\s|,|:/g);
 
    dateObj.setHours(parseInt(timeParts[0]));
    dateObj.setMinutes(parseInt(timeParts[1]));
    dateObj.setSeconds(0);
+   dateObj.setMilliseconds(0);
    return dateObj;
 
 }
@@ -200,6 +201,21 @@ configRoutes = function (app, server) {
          });
    });
 
+   app.delete('/special/delete/:id',
+      function (req, res){
+         models.Special.findByIdAndRemove(req.params.id,
+            function (err, result){
+               if(err){
+                  console.log(err);
+               }
+               else{
+                  console.log('Deleted site ' + req.params.id);
+                  res.send('Successfully deleted special ' + req.params.id );
+               }
+            }
+         );
+   });
+
    app.get('/special/create/:siteId',
        function(req, res){
           var siteId = req.params.siteId;
@@ -217,8 +233,37 @@ configRoutes = function (app, server) {
              }
          });
    });
-
+   //get the current specials
    app.get('/specials', function(req, res){
+      //TODO this needs to be retrieved from client not server time
+      var dateNow = new Date(),
+          rightNow = dateNow.getHours() * 60 + dateNow.getMinutes(),
+          today = [ dateNow.getDay(), 7 ],
+          month = [ dateNow.getMonth(), 12 ],
+          query;
+
+      query = {
+         startTime : { $lte: rightNow},
+         days : { $in : today },
+         months : { $in : month },
+         $where : "this.endTime > " + rightNow + " || this.endTime == 0"
+      };
+      models.Special.find(query)
+          .populate('_site', 'name')
+          .exec( function(err, specials){
+             if(err){
+                console.log(err);
+             }
+             else{
+                res.render('specials',{
+                   title:'Durango Specials',
+                   subHeading:'Specials near you',
+                   specials:specials
+                } );
+             }
+          });
+   });
+   app.get('/specials/all', function(req, res){
       var list = [];
       models.Special.find()
           .populate('_site', 'name')
@@ -235,19 +280,70 @@ configRoutes = function (app, server) {
              }
           });
    });
+
+   app.get('/special/edit/:id', function(req, res){
+      var specialId = req.params.id;
+      models.Special.findById(specialId)
+          .populate('_site', 'name')
+          .exec(function(err, special){
+             if(err){
+                console.log(err);
+             }
+             else{
+                res.render('special_edit', {
+                   title:'Durango Specials',
+                   subHeading: 'Edit special ' + special.title,
+                   special : special
+                });
+             }
+          });
+      });
+
+   app.post('/special/update/:id',
+       function(req, res){
+          var reqData = req.body,
+              id      = req.params.id,
+              special = {};
+          special._site       = reqData._site;
+          special.title       = reqData.title;
+          special.description = reqData.description;
+          special.start       = parseTime(reqData.start);
+          special.end         = parseTime(reqData.end);
+          special.startTime   = special.start.getHours() * 60 + special.start.getMinutes();
+          special.endTime     = special.end.getHours() * 60 + special.end.getMinutes();
+          special.days        = getNumberArray(reqData.days);
+          special.months      = getNumberArray(reqData.months);
+
+          models.Special.findByIdAndUpdate(id, special,
+              function(err, result){
+                 if(err){
+                    console.log(err);
+                 }
+                 else{
+                    console.log('Updated ' + result );
+                    res.redirect('/specials/all');
+                 }
+              }
+          );
+       }
+   );
    app.post('/special/create',
        function(req, res){
           var reqData = req.body,
              special = {};
-          
-          special['_site']       = reqData['id'];
-          special['title']       = reqData['title'];
-          special['description'] = reqData['description'];
-          special['start']       = new Date(reqData['start']);
-          special['end']         = new Date(reqData['end']);
-          special['days']        = getNumberArray(reqData['days']);
-          special['months']      = getNumberArray(reqData['months']);
-          
+
+          special._site       = reqData.id;
+          special.title       = reqData.title;
+          special.description = reqData.description;
+          special.start       = parseTime( reqData.start );
+          special.startTime   = special.start.getHours() * 60 + special.start.getMinutes();
+          special.end         = parseTime( reqData.end );
+          special.endTime     = special.end.getHours() * 60 + special.start.getMinutes();
+          special.days        = getNumberArray( reqData.days );
+          special.months      = getNumberArray( reqData.months );
+
+          //fix the dates
+
           //update the related site
           models.Special.create(special,
              function(err, specialObj){
